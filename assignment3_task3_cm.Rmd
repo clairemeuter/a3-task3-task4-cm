@@ -1,0 +1,76 @@
+---
+title: "a3_task3_claire_meuter"
+author: "Claire Meuter"
+date: "10/28/2021"
+output: html_document
+---
+## Setup
+I atttached tidyverse and here 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(here)
+library(janitor)
+library(DT)
+library(kableExtra)
+library(lubridate)
+```
+
+## Read in my data 
+```{r}
+# read in urchins data
+urchins_data <- read_csv(here("data","urchins.csv"))
+
+```
+# Section 1:
+## Data Wrangling 
+Converted Urchins Data headings to lowercase 
+```{r}
+urchins_clean <- urchins_data %>% clean_names()
+```
+
+
+## Data Visualization
+Section 1: Size comparisions, purple and red urchins
+```{r}
+
+ggplot(data = urchins_clean, aes(x = size)) + 
+  geom_histogram(fill = "goldenrod3", 
+                 color = "goldenrod4",
+                 bins = 10) + 
+  theme_minimal() +
+  labs(x = "Urchins size (mm)",
+       y = "Count",
+       title = "Size comparisions for Purple and Red Urchins",
+       subtitle = "Purple and Red Urchins at all sites and treatments") + 
+  facet_wrap(~common_name)
+```
+
+
+## Descriptive Statistics Table: 
+```{r}
+## First I create a new urchins data set that contains the following statistics for purple and red urchins (still ignoring site as a variable, but including species as a grouping variable): mean, median, standard deviation, and sample size.
+
+urchins_data_table <- urchins_clean %>% 
+  group_by(common_name) %>% 
+  summarize(mean_urchin_size = mean(size, na.rm = TRUE), median_urchin_size = median(size, na.rm = TRUE), st_dev_urchins = sd(size, na.rm = TRUE), sample_size = n())
+
+
+datatable(urchins_data_table)
+## Need to update column names and add values and add table caption
+```
+## Reflection:
+Overall, we see that the mean purple urchin size is significantly smaller than the Red Urchin size. 
+
+# Section 2: Explore purple urchin counts by site and year
+```{r}
+purple_urchins <- urchins_clean %>%
+  mutate(date = ymd(date)) %>%
+  mutate(year = year(date)) %>%
+  mutate(site_full = case_when(
+    site == "NAPL" ~ "Naples Reef", site == "AQUE" ~ "Arroyo Quemado Reef", site == "MOHK" ~ "Mohawk Reef", site == "IVEE" ~ "Isla Vista Reef"))
+```
+
+
+: NAPL = Naples Reef, AQUE = Arroyo Quemado Reef, CARP = Carpinteria Reef, MOHK = Mohawk Reef, IVEE = Isla Vista Reef. 
+
